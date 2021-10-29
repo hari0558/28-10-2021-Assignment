@@ -1,0 +1,58 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+import com.yash.entities.Employees;
+
+public class RetriveDepartmentDetails {
+
+	public static void main(String[] args) {
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		List<Employees>employeeList=new ArrayList<>();
+		try (
+			Scanner scanner=new Scanner(System.in);
+			Connection con=DriverManager.getConnection("jdbc:mysql://localhost:3306/hrDB","root","root");
+				){
+			System.out.println("DepartmentId:");
+			int DepartmentId=0;
+			if(scanner.hasNextInt()) {
+				DepartmentId=scanner.nextInt();
+			}
+			PreparedStatement deptStatement=con.prepareStatement("select * from employees where department_id=?");
+			deptStatement.setInt(1,DepartmentId);
+			ResultSet resultSet=deptStatement.executeQuery();
+			while(resultSet.next()) {
+				Employees employee=new Employees();
+				employee.setEmployeeId(resultSet.getInt("employee_id"));
+				employee.setFirstName(resultSet.getString("first_name"));
+				employee.setLastName(resultSet.getString("last_name"));
+				employee.setEmail(resultSet.getString("email"));
+				employee.setPhoneNumber(resultSet.getString("phone_number"));
+				employee.setHireDate(resultSet.getDate("hire_date").toLocalDate());
+				employee.setJobId(resultSet.getString("job_id"));
+				employee.setSalary(resultSet.getDouble("salary"));
+				employee.setCommissionPCT(resultSet.getDouble("commission_pct"));
+				employeeList.add(employee);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		for(Employees employee:employeeList) {
+		System.out.println(employee);
+		}
+	}
+
+}
+
+
